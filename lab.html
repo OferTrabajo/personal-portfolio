@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Laboratorio Interactivo de Cuadriláteros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+      /* Drag feedback */
+      .grab {
+        cursor: grab;
+      }
+      .grabbing {
+        cursor: grabbing;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <header class="px-4 md:px-8 py-5 border-b bg-white/70 backdrop-blur">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center gap-3">
+        <div class="text-2xl"></div>
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight">
+          Laboratorio interactivo de Cuadriláteros, seguimiento #2
+        </h1>
+        <span
+          class="ml-2 px-3 py-1 rounded-xl text-sm bg-blue-50 text-blue-700 border border-blue-200"
+          >Samuel Ceballos Gómez</span
+        >
+        <div class="ml-auto flex gap-2">
+          <button
+            id="btn-download"
+            class="px-3 py-2 rounded-xl border text-sm bg-white hover:bg-slate-50"
+          >
+            Descargar PNG
+          </button>
+          <a
+            href="#ayuda"
+            class="px-3 py-2 rounded-xl border text-sm bg-white hover:bg-slate-50"
+            >Ayuda</a
+          >
+        </div>
+      </div>
+    </header>
+
+    <main class="px-4 md:px-8 py-6">
+      <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Lienzo -->
+        <section class="lg:col-span-2">
+          <div class="p-4 md:p-5 rounded-2xl bg-white shadow border">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-5 h-5">#</div>
+              <h2 class="font-semibold text-lg">Lienzo</h2>
+            </div>
+            <div class="relative overflow-hidden rounded-2xl">
+              <svg
+                id="stage"
+                class="block w-full h-auto"
+                width="900"
+                height="560"
+                viewBox="0 0 900 560"
+              ></svg>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4 mt-4 text-sm">
+              <label class="inline-flex items-center gap-2">
+                <input
+                  id="toggle-grid"
+                  type="checkbox"
+                  class="accent-blue-600"
+                  checked
+                />
+                <span>Mostrar cuadrícula</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input
+                  id="toggle-snap"
+                  type="checkbox"
+                  class="accent-blue-600"
+                />
+                <span>Encajar a la cuadrícula</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input
+                  id="toggle-lengths"
+                  type="checkbox"
+                  class="accent-blue-600"
+                  checked
+                />
+                <span>Longitudes</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input
+                  id="toggle-angles"
+                  type="checkbox"
+                  class="accent-blue-600"
+                  checked
+                />
+                <span>Ángulos</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input
+                  id="toggle-diagonals"
+                  type="checkbox"
+                  class="accent-blue-600"
+                  checked
+                />
+                <span>Diagonales</span>
+              </label>
+              <div class="flex items-center gap-3">
+                <span class="text-slate-600">Tamaño de arcos</span>
+                <input
+                  id="arc-scale"
+                  type="range"
+                  min="0.4"
+                  max="1.4"
+                  step="0.05"
+                  value="0.8"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Panel lateral -->
+        <aside class="space-y-4">
+          <div class="p-4 rounded-2xl bg-white shadow border">
+            <h3 class="font-semibold mb-2">Clasificación</h3>
+            <div
+              id="tipo"
+              class="inline-block px-3 py-1 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-medium"
+            >
+              —
+            </div>
+            <div id="warnings" class="mt-2 text-sm space-y-1"></div>
+
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-sm"
+              id="props"
+            ></div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-white shadow border">
+            <h3 class="font-semibold mb-2">Acciones rápidas</h3>
+            <div class="grid grid-cols-2 gap-2 mb-2">
+              <button
+                class="btn-preset px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+                data-preset="Cuadrado"
+              >
+                Cuadrado
+              </button>
+              <button
+                class="btn-preset px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+                data-preset="Rectángulo"
+              >
+                Rectángulo
+              </button>
+              <button
+                class="btn-preset px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+                data-preset="Rombo"
+              >
+                Rombo
+              </button>
+              <button
+                class="btn-preset px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+                data-preset="Romboide"
+              >
+                Romboide
+              </button>
+              <button
+                class="btn-preset px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+                data-preset="Trapecio isósceles"
+              >
+                Trapecio isósceles
+              </button>
+              <button
+                class="btn-preset px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+                data-preset="Trapecio rectángulo"
+              >
+                Trapecio rectángulo
+              </button>
+              <button
+                class="btn-preset px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+                data-preset="Deltoide (cometa)"
+              >
+                Deltoide
+              </button>
+              <button
+                class="btn-preset px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+                data-preset="Trapezoide"
+              >
+                Trapezoide
+              </button>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                id="btn-random"
+                class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+              >
+                Aleatorio
+              </button>
+              <button
+                id="btn-parallel"
+                class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+              >
+                Forzar paralelogramo
+              </button>
+              <button
+                id="btn-trap"
+                class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50"
+              >
+                Forzar trapecio (AB ∥ CD)
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-white shadow border">
+            <h3 class="font-semibold mb-2">Medidas y cálculos</h3>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <div class="font-medium mb-1">Lados</div>
+                <ul id="sides" class="grid grid-cols-2 gap-y-1"></ul>
+                <div class="mt-2">Perímetro: <b id="perimetro">—</b></div>
+              </div>
+              <div>
+                <div class="font-medium mb-1">Ángulos</div>
+                <ul id="angles" class="grid grid-cols-2 gap-y-1"></ul>
+                <div class="mt-2">Suma: <b id="sumang">—</b></div>
+              </div>
+              <div>
+                <div class="font-medium mb-1">Diagonales</div>
+                <ul id="diags" class="grid grid-cols-2 gap-y-1"></ul>
+                <div>¿Perpendiculares? <b id="diag-perp">—</b></div>
+                <div>¿Iguales? <b id="diag-eq">—</b></div>
+              </div>
+              <div>
+                <div class="font-medium mb-1">Área</div>
+                <div>Área (shoelace): <b id="area">—</b> u²</div>
+                <div class="mt-1">Convexidad: <b id="convex">—</b></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <section
+        id="ayuda"
+        class="max-w-7xl mx-auto mt-6 p-4 rounded-2xl bg-white shadow border"
+      >
+        <h3 class="font-semibold mb-2">Cómo usar</h3>
+        <ol class="list-decimal pl-5 space-y-1 text-slate-700">
+          <li>
+            Arrastra los vértices <b>A, B, C, D</b> en el lienzo (círculos
+            negros).
+          </li>
+          <li>
+            Activa/oculta cuadrícula, longitudes, ángulos y diagonales con los
+            conmutadores.
+          </li>
+          <li>
+            Usa los presets para ver casos típicos o los botones para forzar
+            propiedades.
+          </li>
+          <li>
+            Descarga una imagen PNG para tu informe haciendo clic en
+            <b>Descargar PNG</b>.
+          </li>
+        </ol>
+      </section>
+    </main>
+
+    <script>
+      // ============================
+      // Configuración
+      // ============================
+      const W = 900,
+        H = 560,
+        gridStep = 40;
+      const tolDeg = 4;
+      const $ = (s) => document.querySelector(s);
+      const svg = "#stage" ? document.querySelector("#stage") : null;
+
+      // Estado
+      let pts = [
+        { x: 200, y: 140 },
+        { x: 700, y: 140 },
+        { x: 640, y: 420 },
+        { x: 260, y: 420 },
+      ];
+      let showGrid = true,
+        showLengths = true,
+        showAngles = true,
+        showDiagonals = true,
+        snap = false;
+      let arcScale = 0.8;
+
+      const nearly = (a, b, tolAbs = 1e-6) => Math.abs(a - b) <= tolAbs;
+      const toDeg = (rad) => (rad * 180) / Math.PI;
+      const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
+      const dot = (ax, ay, bx, by) => ax * bx + ay * by;
+      const cross = (ax, ay, bx, by) => ax * by - ay * bx;
+      const angleBetween = (ax, ay, bx, by) => {
+        const d =
+          Math.sqrt(ax * ax + ay * ay) * Math.sqrt(bx * bx + by * by) || 1;
+        const cos = Math.min(1, Math.max(-1, dot(ax, ay, bx, by) / d));
+        return toDeg(Math.acos(cos));
+      };
+      const isParallel = (v1, v2) => {
+        const a = angleBetween(v1.x, v1.y, v2.x, v2.y);
+        const md = Math.min(a, 180 - a);
+        return md <= tolDeg;
+      };
+      const isPerp = (v1, v2) =>
+        Math.abs(angleBetween(v1.x, v1.y, v2.x, v2.y) - 90) <= tolDeg;
+      const relEqual = (a, b, rel = 0.05) => {
+        const m = (Math.abs(a) + Math.abs(b)) / 2 || 1;
+        return Math.abs(a - b) / m <= rel;
+      };
+      const angleAt = (prev, p, next) => {
+        const v1 = { x: prev.x - p.x, y: prev.y - p.y };
+        const v2 = { x: next.x - p.x, y: next.y - p.y };
+        return angleBetween(v1.x, v1.y, v2.x, v2.y);
+      };
+      const shoelaceArea = (P) => {
+        let s = 0;
+        for (let i = 0; i < P.length; i++) {
+          const j = (i + 1) % P.length;
+          s += P[i].x * P[j].y - P[j].x * P[i].y;
+        }
+        return Math.abs(s) / 2;
+      };
+      const polygonSelfIntersects = (P) => {
+        const segs = [
+          [P[0], P[1]],
+          [P[1], P[2]],
+          [P[2], P[3]],
+          [P[3], P[0]],
+        ];
+        const inter = (A, B, C, D) => {
+          const d1x = B.x - A.x,
+            d1y = B.y - A.y,
+            d2x = D.x - C.x,
+            d2y = D.y - C.y;
+          const denom = cross(d1x, d1y, d2x, d2y);
+          if (Math.abs(denom) < 1e-9) return false;
+          const t = cross(C.x - A.x, C.y - A.y, d2x, d2y) / denom;
+          const u = cross(C.x - A.x, C.y - A.y, d1x, d1y) / denom;
+          return t > 0 && t < 1 && u > 0 && u < 1;
+        };
+        return (
+          inter(segs[0][0], segs[0][1], segs[2][0], segs[2][1]) ||
+          inter(segs[1][0], segs[1][1], segs[3][0], segs[3][1])
+        );
+      };
+      const isConvex = (P) => {
+        const n = P.length;
+        let sign = 0;
+        for (let i = 0; i < n; i++) {
+          const a = P[i],
+            b = P[(i + 1) % n],
+            c = P[(i + 2) % n];
+          const z = cross(b.x - a.x, b.y - a.y, c.x - b.x, c.y - b.y);
+          if (Math.abs(z) > 1e-6) {
+            if (sign === 0) sign = Math.sign(z);
+            else if (Math.sign(z) !== sign) return false;
+          }
+        }
+        return true;
+      };
+
+      // UI helpers
+      function clearSVG(node) {
+        while (node.firstChild) node.removeChild(node.firstChild);
+      }
+      function line(x1, y1, x2, y2, cls, sw = 1) {
+        const el = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "line"
+        );
+        el.setAttribute("x1", x1);
+        el.setAttribute("y1", y1);
+        el.setAttribute("x2", x2);
+        el.setAttribute("y2", y2);
+        el.setAttribute("stroke", cls);
+        el.setAttribute("stroke-width", sw);
+        return el;
+      }
+      function circle(x, y, r, cls) {
+        const el = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle"
+        );
+        el.setAttribute("cx", x);
+        el.setAttribute("cy", y);
+        el.setAttribute("r", r);
+        el.setAttribute("fill", cls);
+        return el;
+      }
+      function polygon(points, opts = {}) {
+        const el = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "polygon"
+        );
+        el.setAttribute("points", points.map((p) => `${p.x},${p.y}`).join(" "));
+        if (opts.fill) el.setAttribute("fill", opts.fill);
+        if (opts.stroke) {
+          el.setAttribute("stroke", opts.stroke);
+          el.setAttribute("stroke-width", opts.sw || 1);
+        }
+        return el;
+      }
+      function text(x, y, str, cls = "12px", fill = "#111", anchor = "middle") {
+        const el = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "text"
+        );
+        el.setAttribute("x", x);
+        el.setAttribute("y", y);
+        el.setAttribute("font-size", cls);
+        el.setAttribute("text-anchor", anchor);
+        el.setAttribute("dominant-baseline", "middle");
+        el.setAttribute("fill", fill);
+        el.textContent = str;
+        return el;
+      }
+      function path(d, stroke = "#9ca3af", fill = "none") {
+        const el = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "path"
+        );
+        el.setAttribute("d", d);
+        el.setAttribute("stroke", stroke);
+        el.setAttribute("fill", fill);
+        return el;
+      }
+
+      function drawAngleArc(center, prev, next, r, label) {
+        const v1 = { x: prev.x - center.x, y: prev.y - center.y };
+        const v2 = { x: next.x - center.x, y: next.y - center.y };
+        const a1 = Math.atan2(v1.y, v1.x);
+        const a2 = Math.atan2(v2.y, v2.x);
+        let start = a1,
+          end = a2,
+          sweep = end - start;
+        if (sweep <= -Math.PI) sweep += 2 * Math.PI;
+        if (sweep > Math.PI) sweep -= 2 * Math.PI;
+        const largeArc = Math.abs(sweep) > Math.PI ? 1 : 0;
+        const sw = sweep >= 0 ? 1 : 0;
+        const p1 = {
+          x: center.x + r * Math.cos(start),
+          y: center.y + r * Math.sin(start),
+        };
+        const p2 = {
+          x: center.x + r * Math.cos(end),
+          y: center.y + r * Math.sin(end),
+        };
+        const d = `M ${p1.x} ${p1.y} A ${r} ${r} 0 ${largeArc} ${sw} ${p2.x} ${p2.y}`;
+        const midAngle = (start + end) / 2;
+        const mid = {
+          x: center.x + (r + 16) * Math.cos(midAngle),
+          y: center.y + (r + 16) * Math.sin(midAngle),
+        };
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.appendChild(path(d, "#9ca3af", "none"));
+        if (label) {
+          g.appendChild(text(mid.x, mid.y, label, "12px", "#374151"));
+        }
+        return g;
+      }
+
+      // Render principal
+      function render() {
+        clearSVG(svg);
+
+        // grid
+        if (showGrid) {
+          for (let x = gridStep; x < W; x += gridStep) {
+            svg.appendChild(line(x, 0, x, H, "#e5e7eb", 1));
+          }
+          for (let y = gridStep; y < H; y += gridStep) {
+            svg.appendChild(line(0, y, W, y, "#e5e7eb", 1));
+          }
+        }
+
+        const [A, B, C, D] = pts;
+
+        // diagonales
+        if (showDiagonals) {
+          svg.appendChild(line(A.x, A.y, C.x, C.y, "#c7d2fe", 2));
+          svg.appendChild(line(B.x, B.y, D.x, D.y, "#c7d2fe", 2));
+        }
+
+        // polígono
+        svg.appendChild(
+          polygon(pts, { fill: "#3b82f610", stroke: "#2563eb", sw: 3 })
+        );
+
+        // ángulos
+        if (showAngles) {
+          const angs = geom.angulos;
+          const labels = [
+            { p: A, prev: D, next: B, name: "∠A", val: angs[0] },
+            { p: B, prev: A, next: C, name: "∠B", val: angs[1] },
+            { p: C, prev: B, next: D, name: "∠C", val: angs[2] },
+            { p: D, prev: C, next: A, name: "∠D", val: angs[3] },
+          ];
+          labels.forEach((al) => {
+            svg.appendChild(
+              drawAngleArc(
+                al.p,
+                al.prev,
+                al.next,
+                28 * arcScale,
+                `${al.name} ${al.val.toFixed(1)}°`
+              )
+            );
+          });
+        }
+
+        // longitudes
+        if (showLengths) {
+          const pairs = [
+            { from: A, to: B, name: "AB" },
+            { from: B, to: C, name: "BC" },
+            { from: C, to: D, name: "CD" },
+            { from: D, to: A, name: "DA" },
+          ];
+          pairs.forEach(({ from, to, name }) => {
+            const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
+            const len = dist(from, to).toFixed(1);
+            svg.appendChild(text(mid.x, mid.y - 6, name, "12px", "#111827"));
+            svg.appendChild(text(mid.x, mid.y + 10, len, "12px", "#374151"));
+          });
+        }
+
+        // vértices
+        [A, B, C, D].forEach((p, i) => {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.classList.add("grab");
+          g.appendChild(circle(p.x, p.y, 9, "#111827"));
+          g.appendChild(text(p.x, p.y - 14, "ABCD"[i], "12px", "#111827"));
+          g.addEventListener("pointerdown", (e) => onPointerDown(e, i));
+          svg.appendChild(g);
+        });
+
+        // panel lateral
+        $("#tipo").textContent = geom.tipo;
+        const warn = $("#warnings");
+        warn.innerHTML = "";
+        if (geom.selfX) {
+          const d = document.createElement("div");
+          d.className = "text-red-600";
+          d.textContent =
+            "Aviso: el cuadrilátero se cruza a sí mismo (forma de X). Arrastra para corregir.";
+          warn.appendChild(d);
+        } else if (!geom.convex) {
+          const d = document.createElement("div");
+          d.className = "text-amber-600";
+          d.textContent = "El cuadrilátero es cóncavo.";
+          warn.appendChild(d);
+        }
+
+        const props = [
+          {
+            label: "Suma de ángulos ≈ 360°",
+            ok: Math.abs(geom.sumAng - 360) < 1,
+          },
+          {
+            label: "Pares de lados opuestos paralelos (2)",
+            ok: geom.bothOppPar,
+          },
+          { label: "Un solo par de lados paralelos", ok: geom.onePairParOnly },
+          { label: "Todos los ángulos rectos", ok: geom.allRight },
+          { label: "Todos los lados iguales", ok: geom.allSidesEq },
+          { label: "Diagonales perpendiculares", ok: geom.diagonalsPerp },
+          { label: "Diagonales iguales", ok: geom.diagonalsEq },
+          { label: "Tiene algún ángulo recto", ok: geom.hasRightAngle },
+          {
+            label: "Trapecio isósceles (lados no paralelos iguales)",
+            ok: geom.isIsoTrap,
+          },
+          {
+            label: "Deltoide (pares adyacentes de lados iguales)",
+            ok: geom.kiteAdjacentEq,
+          },
+        ];
+        const propsNode = $("#props");
+        propsNode.innerHTML = "";
+        props.forEach((p) => {
+          const d = document.createElement("div");
+          d.className =
+            "px-3 py-2 rounded-xl border text-sm " +
+            (p.ok
+              ? "bg-green-50 border-green-200 text-green-700"
+              : "bg-slate-50 border-slate-200 text-slate-600");
+          d.textContent = (p.ok ? "✓ " : "✗ ") + p.label;
+          propsNode.appendChild(d);
+        });
+
+        // medidas
+        const sUl = $("#sides");
+        sUl.innerHTML = "";
+        ["AB", "BC", "CD", "DA"].forEach((n, i) => {
+          const li = document.createElement("li");
+          li.textContent = `${n} = ${geom.sides[i].toFixed(2)}`;
+          sUl.appendChild(li);
+        });
+        $("#perimetro").textContent = geom.perimetro.toFixed(2);
+
+        const aUl = $("#angles");
+        aUl.innerHTML = "";
+        ["∠A", "∠B", "∠C", "∠D"].forEach((n, i) => {
+          const li = document.createElement("li");
+          li.textContent = `${n} = ${geom.angulos[i].toFixed(1)}°`;
+          aUl.appendChild(li);
+        });
+        $("#sumang").textContent = geom.sumAng.toFixed(1) + "°";
+
+        const dUl = $("#diags");
+        dUl.innerHTML = "";
+        const labelsD = ["AC", "BD"];
+        [geom.diagAC, geom.diagBD].forEach((v, i) => {
+          const li = document.createElement("li");
+          li.textContent = `${labelsD[i]} = ${v.toFixed(2)}`;
+          dUl.appendChild(li);
+        });
+        $("#diag-perp").textContent = geom.diagonalsPerp ? "Sí" : "No";
+        $("#diag-eq").textContent = geom.diagonalsEq ? "Sí" : "No";
+
+        $("#area").textContent = geom.area.toFixed(2);
+        $("#convex").textContent = geom.selfX
+          ? "Autointersecado"
+          : geom.convex
+          ? "Convexo"
+          : "Cóncavo";
+      }
+
+      // Cálculos derivados
+      function computeGeom() {
+        const [A, B, C, D] = pts;
+        const sides = [dist(A, B), dist(B, C), dist(C, D), dist(D, A)];
+        const perimetro = sides.reduce((a, b) => a + b, 0);
+        const angulos = [
+          angleAt(D, A, B),
+          angleAt(A, B, C),
+          angleAt(B, C, D),
+          angleAt(C, D, A),
+        ];
+
+        const vAB = { x: B.x - A.x, y: B.y - A.y };
+        const vBC = { x: C.x - B.x, y: C.y - B.y };
+        const vCD = { x: D.x - C.x, y: D.y - C.y };
+        const vDA = { x: A.x - D.x, y: A.y - D.y };
+
+        const oppPar = [isParallel(vAB, vCD), isParallel(vBC, vDA)];
+        const bothOppPar = oppPar[0] && oppPar[1];
+        const onePairParOnly = (oppPar[0] ? 1 : 0) + (oppPar[1] ? 1 : 0) === 1;
+
+        const allRight = angulos.every((a) => Math.abs(a - 90) < tolDeg);
+        const allSidesEq = sides.every((s) => relEqual(s, sides[0]));
+
+        const diagAC = dist(A, C),
+          diagBD = dist(B, D);
+        const diagVecAC = { x: C.x - A.x, y: C.y - A.y };
+        const diagVecBD = { x: D.x - B.x, y: D.y - B.y };
+        const diagonalsPerp = isPerp(diagVecAC, diagVecBD);
+        const diagonalsEq = relEqual(diagAC, diagBD, 0.03);
+
+        const area = shoelaceArea(pts);
+        const sumAng = angulos.reduce((a, b) => a + b, 0);
+
+        const isIsoTrap = onePairParOnly && relEqual(sides[1], sides[3]); // BC == DA
+        const hasRightAngle = angulos.some((a) => Math.abs(a - 90) < tolDeg);
+
+        const kiteAdjacentEq =
+          (relEqual(sides[0], sides[1]) && relEqual(sides[2], sides[3])) ||
+          (relEqual(sides[1], sides[2]) && relEqual(sides[3], sides[0]));
+
+        let tipo = "Trapezoide";
+        if (bothOppPar) {
+          if (allRight && allSidesEq) tipo = "Cuadrado";
+          else if (allRight) tipo = "Rectángulo";
+          else if (allSidesEq) tipo = "Rombo";
+          else tipo = "Romboide";
+        } else if (onePairParOnly) {
+          if (hasRightAngle) tipo = "Trapecio rectángulo";
+          else if (isIsoTrap) tipo = "Trapecio isósceles";
+          else tipo = "Trapecio";
+        } else if (kiteAdjacentEq) {
+          tipo = "Deltoide (cometa)";
+        } else {
+          tipo = "Trapezoide";
+        }
+
+        const selfX = polygonSelfIntersects(pts);
+        const convex = !selfX && isConvex(pts);
+
+        return {
+          sides,
+          perimetro,
+          angulos,
+          oppPar,
+          bothOppPar,
+          onePairParOnly,
+          allRight,
+          allSidesEq,
+          diagAC,
+          diagBD,
+          diagonalsPerp,
+          diagonalsEq,
+          area,
+          sumAng,
+          tipo,
+          hasRightAngle,
+          isIsoTrap,
+          kiteAdjacentEq,
+          selfX,
+          convex,
+          vAB,
+          vBC,
+          vCD,
+          vDA,
+        };
+      }
+
+      let geom = computeGeom();
+
+      // Interacción de arrastre
+      let dragIndex = null;
+      function onPointerDown(e, i) {
+        dragIndex = i;
+        const target = e.currentTarget;
+        target.setPointerCapture?.(e.pointerId);
+        target.classList.add("grabbing");
+        function move(ev) {
+          const rect = svg.getBoundingClientRect();
+          let x = ev.clientX - rect.left;
+          let y = ev.clientY - rect.top;
+          if (snap) {
+            x = Math.round(x / gridStep) * gridStep;
+            y = Math.round(y / gridStep) * gridStep;
+          }
+          pts[i] = { x, y };
+          geom = computeGeom();
+          render();
+        }
+        function up(ev) {
+          dragIndex = null;
+          target.releasePointerCapture?.(e.pointerId);
+          target.classList.remove("grabbing");
+          window.removeEventListener("pointermove", move);
+          window.removeEventListener("pointerup", up);
+        }
+        window.addEventListener("pointermove", move);
+        window.addEventListener("pointerup", up);
+      }
+
+      // Controles
+      $("#toggle-grid").addEventListener("change", (e) => {
+        showGrid = e.target.checked;
+        render();
+      });
+      $("#toggle-lengths").addEventListener("change", (e) => {
+        showLengths = e.target.checked;
+        render();
+      });
+      $("#toggle-angles").addEventListener("change", (e) => {
+        showAngles = e.target.checked;
+        render();
+      });
+      $("#toggle-diagonals").addEventListener("change", (e) => {
+        showDiagonals = e.target.checked;
+        render();
+      });
+      $("#toggle-snap").addEventListener("change", (e) => {
+        snap = e.target.checked;
+      });
+
+      $("#arc-scale").addEventListener("input", (e) => {
+        arcScale = parseFloat(e.target.value);
+        render();
+      });
+
+      document.querySelectorAll(".btn-preset").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const name = btn.dataset.preset;
+          switch (name) {
+            case "Cuadrado":
+              pts = [
+                { x: 300, y: 180 },
+                { x: 580, y: 180 },
+                { x: 580, y: 460 },
+                { x: 300, y: 460 },
+              ];
+              break;
+            case "Rectángulo":
+              pts = [
+                { x: 260, y: 180 },
+                { x: 660, y: 180 },
+                { x: 600, y: 460 },
+                { x: 200, y: 460 },
+              ];
+              break;
+            case "Rombo":
+              pts = [
+                { x: 420, y: 160 },
+                { x: 640, y: 300 },
+                { x: 480, y: 460 },
+                { x: 260, y: 320 },
+              ];
+              break;
+            case "Romboide":
+              pts = [
+                { x: 260, y: 180 },
+                { x: 640, y: 220 },
+                { x: 600, y: 460 },
+                { x: 220, y: 420 },
+              ];
+              break;
+            case "Trapecio isósceles":
+              pts = [
+                { x: 300, y: 220 },
+                { x: 620, y: 220 },
+                { x: 560, y: 440 },
+                { x: 360, y: 440 },
+              ];
+              break;
+            case "Trapecio rectángulo":
+              pts = [
+                { x: 280, y: 220 },
+                { x: 640, y: 220 },
+                { x: 640, y: 460 },
+                { x: 320, y: 460 },
+              ];
+              break;
+            case "Deltoide (cometa)":
+              pts = [
+                { x: 460, y: 140 },
+                { x: 660, y: 320 },
+                { x: 460, y: 480 },
+                { x: 280, y: 320 },
+              ];
+              break;
+            case "Trapezoide":
+              pts = [
+                { x: 260, y: 220 },
+                { x: 640, y: 260 },
+                { x: 560, y: 480 },
+                { x: 320, y: 420 },
+              ];
+              break;
+          }
+          geom = computeGeom();
+          render();
+        });
+      });
+
+      $("#btn-random").addEventListener("click", () => {
+        const margin = 60;
+        const rnd = () =>
+          Math.round((margin + Math.random() * (W - 2 * margin)) / gridStep) *
+          gridStep;
+        pts = [
+          { x: rnd(), y: rnd() },
+          { x: rnd(), y: rnd() },
+          { x: rnd(), y: rnd() },
+          { x: rnd(), y: rnd() },
+        ];
+        geom = computeGeom();
+        render();
+      });
+
+      $("#btn-parallel").addEventListener("click", () => {
+        const [A, B, C] = pts;
+        pts = [A, B, C, { x: A.x + (C.x - B.x), y: A.y + (C.y - B.y) }];
+        geom = computeGeom();
+        render();
+      });
+
+      $("#btn-trap").addEventListener("click", () => {
+        const [A, B, C, D] = pts;
+        const v = { x: B.x - A.x, y: B.y - A.y };
+        const len = Math.hypot(D.x - C.x, D.y - C.y) || 1;
+        const norm = Math.hypot(v.x, v.y) || 1;
+        const vu = { x: v.x / norm, y: v.y / norm };
+        pts = [A, B, C, { x: C.x + vu.x * len, y: C.y + vu.y * len }];
+        geom = computeGeom();
+        render();
+      });
+
+      // Descargar PNG del SVG
+      $("#btn-download").addEventListener("click", async () => {
+        const xml = new XMLSerializer().serializeToString(svg);
+        const svg64 = btoa(unescape(encodeURIComponent(xml)));
+        const image64 = `data:image/svg+xml;base64,${svg64}`;
+        const img = new Image();
+        img.src = image64;
+        await new Promise((res) => (img.onload = res));
+        const canvas = document.createElement("canvas");
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, W, H);
+        ctx.drawImage(img, 0, 0);
+        const url = canvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `cuadrilatero_${geom.tipo}.png`;
+        a.click();
+      });
+
+      // Primer render
+      render();
+    </script>
+  </body>
+</html>
