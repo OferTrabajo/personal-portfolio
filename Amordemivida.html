@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cuenta regresiva</title>
+
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        background: black;
+        color: white;
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      #box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #heart {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      #timer {
+        font-size: 3rem;
+        letter-spacing: 3px;
+      }
+
+      a {
+        margin-top: 30px;
+        padding: 15px 40px;
+        background: white;
+        color: black;
+        text-decoration: none;
+        border-radius: 30px;
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="box">
+      <div id="heart">🤍</div>
+      <div id="timer">00:00:00</div>
+      <a id="go" href="wrapped.html">💖 Primer mes wrapped</a>
+    </div>
+
+    <script>
+      const target = new Date("January 12, 2026 05:00:00").getTime();
+      const timer = document.getElementById("timer");
+      const btn = document.getElementById("go");
+
+      setInterval(() => {
+        const now = new Date().getTime();
+        let diff = target - now;
+
+        if (diff <= 0) {
+          timer.innerHTML = "00:00:00";
+          btn.style.display = "inline-block";
+          return;
+        }
+
+        const h = Math.floor(diff / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+        timer.innerHTML = `${String(h).padStart(2, "0")}:${String(m).padStart(
+          2,
+          "0"
+        )}:${String(s).padStart(2, "0")}`;
+      }, 1000);
+    </script>
+  </body>
+</html>
