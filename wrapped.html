@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Primer mes wrapped</title>
+
+    <style>
+      body {
+        margin: 0;
+        background: black;
+        color: white;
+        font-family: sans-serif;
+        overflow: hidden;
+      }
+
+      #start {
+        position: fixed;
+        inset: 0;
+        background: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+      }
+      #heart {
+        font-size: 6rem;
+        animation: pulse 1.5s infinite;
+        cursor: pointer;
+      }
+      @keyframes pulse {
+        50% {
+          transform: scale(1.25);
+        }
+      }
+
+      #progressBar {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 6px;
+        background: #222;
+      }
+      #progress {
+        width: 0%;
+        height: 100%;
+        background: #ff5fa2;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: 1s;
+      }
+      .slide.active {
+        opacity: 1;
+      }
+
+      .slide img {
+        width: 85%;
+        border-radius: 20px;
+      }
+
+      .text {
+        position: absolute;
+        bottom: 12%;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 15px 25px;
+        border-radius: 20px;
+        font-size: 1.2rem;
+        text-align: center;
+      }
+
+      .counter {
+        font-size: 3rem;
+        margin-top: 20px;
+        animation: countGrow 1s ease;
+      }
+      @keyframes countGrow {
+        from {
+          transform: scale(0.6);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="start"><div id="heart">🤍</div></div>
+    <div id="progressBar"><div id="progress"></div></div>
+    <audio id="music" src="musica.mp3"></audio>
+    <div id="slides"></div>
+
+    <script>
+      const heart = document.getElementById("heart");
+      const start = document.getElementById("start");
+      const music = document.getElementById("music");
+      const slidesContainer = document.getElementById("slides");
+      const progress = document.getElementById("progress");
+
+      heart.onclick = () => {
+        start.style.opacity = 0;
+        setTimeout(() => start.remove(), 1000);
+        music.play();
+        startShow();
+      };
+
+      const baseSlides = [
+        {
+          img: "fotos/01.jpg",
+          text: "Un 11 de septiembre llegó un mensaje que cambió todo",
+        },
+        { img: "fotos/02.jpg", text: "A las 7:58 PM empezó nuestra historia" },
+        {
+          img: "fotos/03.jpg",
+          text: "11 - 12 de diciembre, por fin éramos nosotros",
+        },
+        {
+          img: "fotos/04.jpg",
+          text: "Y desde entonces no hemos parado de elegirnos",
+        },
+      ];
+
+      baseSlides.forEach((s) => {
+        const d = document.createElement("div");
+        d.className = "slide";
+        d.innerHTML = `<img src="${s.img}"><div class="text">${s.text}</div>`;
+        slidesContainer.appendChild(d);
+      });
+
+      // FAST (0.9 segundos)
+      for (let i = 1; i <= 10; i++) {
+        const f = document.createElement("div");
+        f.className = "slide fast";
+        f.innerHTML = `<img src="fast/${String(i).padStart(2, "0")}.jpg">`;
+        slidesContainer.appendChild(f);
+      }
+
+      // Slide 05
+      slidesContainer.innerHTML += `
+<div class="slide"><img src="fotos/05.jpg"><div class="text">Este fue nuestro primer mes…</div></div>
+`;
+
+      // Contadores
+      slidesContainer.innerHTML += `
+<div class="slide">
+  <h1>Llevamos</h1>
+  <div id="contador" class="counter"></div>
+</div>
+<div class="slide">
+  <h1 id="minutos" class="counter"></h1>
+</div>
+`;
+
+      // Slide 06
+      slidesContainer.innerHTML += `
+<div class="slide"><img src="fotos/06.jpg"><div class="text">Y ha sido de mis cosas favoritas</div></div>
+`;
+
+      // Final
+      slidesContainer.innerHTML += `
+<div class="slide" id="final"><h1 style="font-size:5rem">🤍</h1><p></p></div>
+`;
+
+      let slides = document.querySelectorAll(".slide");
+      let index = 0;
+
+      function startShow() {
+        slides[0].classList.add("active");
+        next();
+      }
+
+      function next() {
+        progress.style.width = "0%";
+        setTimeout(() => (progress.style.width = "100%"), 50);
+
+        let delay = slides[index].classList.contains("fast") ? 900 : 5000;
+
+        setTimeout(() => {
+          slides[index].classList.remove("active");
+          index++;
+          if (index < slides.length) {
+            slides[index].classList.add("active");
+
+            if (slides[index].querySelector("#contador")) {
+              startCounter();
+            }
+            if (slides[index].querySelector("#minutos")) {
+              setMinutes();
+            }
+
+            next();
+          }
+        }, delay);
+      }
+
+      // FECHA REAL DE INICIO
+      const startDate = new Date(2025, 11, 12, 0, 0, 0);
+
+      function startCounter() {
+        const el = document.getElementById("contador");
+        setInterval(() => {
+          const now = new Date();
+          const diff = now - startDate;
+          const days = Math.floor(diff / 86400000);
+          const hours = Math.floor((diff % 86400000) / 3600000);
+          const minutes = Math.floor((diff % 3600000) / 60000);
+          const seconds = Math.floor((diff % 60000) / 1000);
+          el.textContent = `${days} días ${hours} h ${minutes} m ${seconds} s`;
+        }, 1000);
+      }
+
+      function setMinutes() {
+        const now = new Date();
+        const diff = now - startDate;
+        const mins = Math.floor(diff / 60000);
+        document.getElementById(
+          "minutos"
+        ).textContent = `Eso son ${mins.toLocaleString()} minutos 🤍`;
+      }
+
+      document.addEventListener("click", () => {
+        if (index === slides.length - 1) {
+          location.href = "cupones.html";
+        }
+      });
+    </script>
+  </body>
+</html>
